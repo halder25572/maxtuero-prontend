@@ -26,8 +26,8 @@ const config: Config = {
         gold: "#F59E0B",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "sans-serif"],
-        display: ["var(--font-playfair)", "serif"],
+        sans: ["var(--font-outfit)", "sans-serif"],
+        display: ["var(--font-outfit)", "sans-serif"],
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatPrice } from "@/lib/utils";
+import Image from "next/image";
 
 interface TimeLeft {
   days: number;
@@ -37,35 +38,65 @@ export default function RaffleSection() {
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <h2 className="font-display text-3xl font-bold text-gray-900">Win Your Dream Home</h2>
-          <p className="text-gray-500 mt-1">Participate in Our Property Raffles</p>
+          <h2 className="font-display text-5xl font-bold text-gray-900">Win Your Dream Home</h2>
+          <p className="text-gray-500 text-[20px] font-medium mt-1">Participate in Our Property Raffles</p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-gray-50 rounded-3xl overflow-hidden">
-          <img
-            src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800"
+        <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+          <Image
+            src="/images/win1.jpg"
             alt="Luxury Villa"
-            className="w-full h-80 object-cover"
+            className="object-cover rounded-2xl"
+            width={811}
+            height={519}
           />
-          <div className="p-8">
-            <span className="text-xs font-semibold text-primary-600 uppercase tracking-widest">Current Raffle</span>
-            <h3 className="font-display text-2xl font-bold text-gray-900 mt-2 mb-1">
+          <div className="shadow-[0_25px_50px_-12px_rgba(0,0,0,0.05)] p-[40px] rounded-r-2xl h-[470px]">
+            {/* Current Raffle */}
+            <span className="text-xs font-semibold text-primary-600 uppercase tracking-widest">
+              Current Raffle
+            </span>
+
+            {/* Title */}
+            <h3 className="font-bold text-2xl text-gray-900 mt-1 mb-1">
               Luxury Beachfront Villa
             </h3>
-            <p className="text-gray-500 text-sm mb-6">Win this {formatPrice(850000)} Villa</p>
 
-            <div className="flex gap-3 mb-6">
+            {/* Price */}
+            <p className="text-primary-600 font-semibold text-base mb-4">
+              Win this {formatPrice(850000)} Villa
+            </p>
+
+            {/* Tickets Sold */}
+            <div className="flex items-center justify-between text-sm text-gray-500 mb-5">
+              <span>Tickets Sold</span>
+              <span>2,847 / 5,000</span>
+            </div>
+
+            {/* Countdown */}
+            <div className="flex gap-3 mb-5">
               {units.map(({ label, value }) => (
-                <div key={label} className="flex-1 bg-navy-DEFAULT text-white rounded-xl p-3 text-center">
-                  <p className="font-bold text-2xl">{String(value).padStart(2, "0")}</p>
-                  <p className="text-xs text-white/60 mt-1">{label}</p>
+                <div
+                  key={label}
+                  className="flex-1 bg-blue-50 rounded-xl py-3 text-center"
+                >
+                  <p className="font-bold text-xl text-primary-600">
+                    {String(value).padStart(2, "0")}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">{label}</p>
                 </div>
               ))}
             </div>
 
-            <button className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-xl transition-colors">
+            {/* Button */}
+            <button className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3.5 rounded-full transition-colors mb-3">
               Buy Tickets Now
             </button>
+
+            {/* Trust Badges */}
+            <div className="flex items-center justify-center gap-5 text-xs text-gray-400">
+              <span>⊙ Secure</span>
+              <span>⊙ Licensed</span>
+              <span>✓ Verified</span>
+            </div>
           </div>
         </div>
       </div>

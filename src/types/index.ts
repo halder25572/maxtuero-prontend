@@ -23,6 +23,8 @@ export interface Agent {
   id: string;
   name: string;
   title: string;
+  designation?: string;
+  
   avatar: string;
   listings: number;
   sales: number;
