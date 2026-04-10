@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -8,27 +8,48 @@ import { NAV_LINKS } from "@/lib/constants";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const isHome = pathname === "/";
+
+  useEffect(() => {
+    if (!isHome) {
+      setIsScrolled(true);
+      return;
+    }
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 24);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHome]);
 
   const isActiveLink = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  const navShellClass = isHome
-    ? "fixed top-0 left-0 right-0 z-50 bg-[rgba(255,255,255,0.16)] backdrop-blur-[8px]"
-    : "fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm";
+  const hasSolidNav = !isHome || isScrolled;
+
+  const navShellClass = hasSolidNav
+    ? "fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm"
+    : "fixed top-0 left-0 right-0 z-50 bg-[rgba(255,255,255,0.16)] backdrop-blur-[8px]";
 
   const navLinkClass = (href: string) =>
     `text-sm font-medium transition-colors ${
       isActiveLink(href)
         ? href === "/" && isHome
-          ? "text-white font-bold"
+          ? hasSolidNav
+            ? "text-gray-900 font-bold"
+            : "text-white font-bold"
           : "text-primary-600"
-        : isHome
-          ? "text-white/70 hover:text-white"
-          : "text-gray-600 hover:text-gray-900"
+        : hasSolidNav
+          ? "text-gray-700 hover:text-gray-900"
+          : "text-white/70 hover:text-white"
     }`;
 
   return (
@@ -39,7 +60,7 @@ export default function Navbar() {
           <Link
             href="/"
             className={`font-display font-bold text-xl tracking-wide ${
-              isHome ? "text-white" : "text-gray-900"
+              hasSolidNav ? "text-gray-900" : "text-white"
             }`}
           >
             EXPOVIVIENDA
@@ -70,7 +91,9 @@ export default function Navbar() {
 
           {/* Mobile toggle */}
           <button
-            className="md:hidden p-2 text-gray-600"
+            className={`md:hidden p-2 transition-colors ${
+              hasSolidNav ? "text-gray-700" : "text-white"
+            }`}
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -87,9 +110,7 @@ export default function Navbar() {
               href={link.href}
               className={`block py-2 text-sm font-medium ${
                 isActiveLink(link.href)
-                  ? link.href === "/" && isHome
-                    ? "text-white font-bold"
-                    : "text-primary-600"
+                  ? "text-primary-600"
                   : "text-gray-700 hover:text-primary-600"
               }`}
               onClick={() => setMobileOpen(false)}

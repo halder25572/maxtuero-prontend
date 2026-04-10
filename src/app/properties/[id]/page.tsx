@@ -4,21 +4,21 @@ import PropertyDetailView from "@/components/properties/PropertyDetailView";
 import { FEATURED_PROPERTIES } from "@/lib/constants";
 
 type PropertyDetailPageProps = {
-	params: {
-		id: string;
-	};
+  params: Promise<{ id: string }>;
 };
 
-export default function PropertyDetailPage({ params }: PropertyDetailPageProps) {
-	const property = FEATURED_PROPERTIES.find((item) => item.id === params.id);
+export default async function PropertyDetailPage({ params }: PropertyDetailPageProps) {
+  const { id } = await params;
 
-	if (!property) {
-		notFound();
-	}
+  const property = FEATURED_PROPERTIES.find((item) => item.id === id);
 
-	return (
-		<PublicPageFrame className="bg-gray-50">
-			<PropertyDetailView property={property} />
-		</PublicPageFrame>
-	);
+  if (!property) {
+    notFound();
+  }
+
+  return (
+    <PublicPageFrame className="bg-gray-50">
+      <PropertyDetailView property={property} />
+    </PublicPageFrame>
+  );
 }

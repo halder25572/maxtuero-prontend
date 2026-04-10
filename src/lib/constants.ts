@@ -239,9 +239,9 @@ export const VIRTUAL_EXPOS: VirtualExpo[] = [
 export const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Properties", href: "/properties" },
-  { label: "Property Fair", href: "/virtual-expo" },
-  { label: "Raffles", href: "/raffles" },
-  { label: "Agents", href: "/agents" },
-  { label: "About", href: "/about" },
+  { label: "Property Fair", href: "/property-fair" },
+  { label: "Raffles", href: "/raffle" },
+  { label: "Agents", href: "/agentss" },
+  { label: "About", href: "/about-page" },
   { label: "Contact", href: "/contact" },
 ];

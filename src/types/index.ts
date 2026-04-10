@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 // Property Types
 export interface Property {
   id: string;
@@ -20,6 +22,7 @@ export interface Property {
 
 // Agent Types
 export interface Agent {
+  [x: string]: ReactNode;
   id: string;
   name: string;
   title: string;
