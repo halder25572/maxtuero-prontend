@@ -1,7 +1,14 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { Target, Users, Globe, CheckCircle } from "lucide-react";
+import { Target, CheckCircle, Globe } from "lucide-react";
 import CTASection from "@/components/home/CTASection";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const stats = [
     { value: "12,000+", label: "Happy Clients" },
@@ -104,23 +111,136 @@ const journey = [
 ];
 
 export default function AboutSection() {
+    const heroRef = useRef<HTMLDivElement>(null);
+    const statsRef = useRef<HTMLDivElement>(null);
+    const purposeRef = useRef<HTMLDivElement>(null);
+    const teamRef = useRef<HTMLDivElement>(null);
+    const journeyRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+
+            // Hero text fade in up
+            gsap.from(".hero-title", {
+                y: 60,
+                opacity: 0,
+                duration: 1,
+                ease: "power3.out",
+            });
+            gsap.from(".hero-desc", {
+                y: 40,
+                opacity: 0,
+                duration: 1,
+                delay: 0.2,
+                ease: "power3.out",
+            });
+            gsap.from(".hero-btns", {
+                y: 30,
+                opacity: 0,
+                duration: 0.8,
+                delay: 0.4,
+                ease: "power3.out",
+            });
+
+            // Stats cards stagger
+            gsap.from(".stat-card", {
+                scrollTrigger: {
+                    trigger: statsRef.current,
+                    start: "top 85%",
+                },
+                y: 40,
+                opacity: 0,
+                duration: 0.7,
+                stagger: 0.15,
+                ease: "power3.out",
+            });
+
+            // Purpose cards stagger
+            gsap.from(".purpose-card", {
+                scrollTrigger: {
+                    trigger: purposeRef.current,
+                    start: "top 85%",
+                },
+                y: 50,
+                opacity: 0,
+                duration: 0.7,
+                stagger: 0.15,
+                ease: "power3.out",
+            });
+
+            // Purpose heading
+            gsap.from(".purpose-heading", {
+                scrollTrigger: {
+                    trigger: purposeRef.current,
+                    start: "top 90%",
+                },
+                y: 30,
+                opacity: 0,
+                duration: 0.7,
+                ease: "power3.out",
+            });
+
+            // Team cards stagger
+            gsap.from(".team-card", {
+                scrollTrigger: {
+                    trigger: teamRef.current,
+                    start: "top 85%",
+                },
+                y: 60,
+                opacity: 0,
+                duration: 0.7,
+                stagger: 0.1,
+                ease: "power3.out",
+            });
+
+            // Journey items stagger from left/right
+            gsap.from(".journey-card", {
+                scrollTrigger: {
+                    trigger: journeyRef.current,
+                    start: "top 85%",
+                },
+                x: (i) => (i % 2 === 0 ? -60 : 60),
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.2,
+                ease: "power3.out",
+            });
+
+            // Journey dots pop in
+            gsap.from(".journey-dot", {
+                scrollTrigger: {
+                    trigger: journeyRef.current,
+                    start: "top 85%",
+                },
+                scale: 0,
+                opacity: 0,
+                duration: 0.5,
+                stagger: 0.2,
+                ease: "back.out(2)",
+            });
+
+        });
+
+        return () => ctx.revert();
+    }, []);
+
     return (
         <>
             <Navbar />
             <div className="min-h-screen bg-white pt-16">
 
                 {/* Hero */}
-                <section className="bg-blue-50 py-16 md:py-20 text-center px-4">
+                <section className="bg-blue-50 py-16 md:py-20 text-center px-4" ref={heroRef}>
                     <div className="max-w-3xl mx-auto">
-                        <h1 className="text-2xl sm:text-3xl md:text-[56px] font-bold text-gray-900 mb-4 md:leading-[61px]">
+                        <h1 className="hero-title text-2xl sm:text-3xl md:text-[56px] font-bold text-gray-900 mb-4 md:leading-[61px]">
                             Transforming Real Estate in
                             <br /> the Dominican Republic
                         </h1>
-                        <p className="text-gray-500 mt-[20px] text-sm sm:text-base leading-relaxed mb-8 max-w-xl mx-auto">
+                        <p className="hero-desc text-gray-500 mt-[20px] text-sm sm:text-base leading-relaxed mb-8 max-w-xl mx-auto">
                             ExpoVivienda was created to connect buyers with premium properties through innovative
                             virtual technology, expert guidance, and exclusive raffle opportunities.
                         </p>
-                        <div className="flex gap-3 justify-center">
+                        <div className="hero-btns flex gap-3 justify-center">
                             <a href="/properties" className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors">
                                 Explore Properties
                             </a>
@@ -131,9 +251,9 @@ export default function AboutSection() {
                     </div>
 
                     {/* Stats */}
-                    <div className="flex flex-wrap justify-center gap-8 sm:gap-16 mt-12">
+                    <div ref={statsRef} className="flex flex-wrap justify-center gap-8 sm:gap-16 mt-12">
                         {stats.map((s) => (
-                            <div key={s.label} className="text-center bg-white pt-[32px] pb-[60px] px-[77px] rounded-[16px] bg-transparent shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)]">
+                            <div key={s.label} className="stat-card text-center bg-white pt-[32px] pb-[60px] px-[77px] rounded-[16px] bg-transparent shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)]">
                                 <p className="text-[32px] mb-[8px] font-bold text-[#2664EB]">{s.value}</p>
                                 <p className="text-[#4B5563] text-[14px] font-medium mt-0.5">{s.label}</p>
                             </div>
@@ -142,16 +262,15 @@ export default function AboutSection() {
                 </section>
 
                 {/* Our Purpose */}
-                <section className="py-16 md:py-20 bg-white">
+                <section className="py-16 md:py-20 bg-white" ref={purposeRef}>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-12">
+                        <div className="purpose-heading text-center mb-12">
                             <h2 className="text-2xl sm:text-5xl font-bold text-gray-900">Our Purpose</h2>
                             <p className="text-[#4B5563] text-sm mt-2">The principles that guide everything we do</p>
                         </div>
-
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             {purposes.map((p) => (
-                                <div key={p.title} className="bg-blue-50 rounded-2xl p-6">
+                                <div key={p.title} className="purpose-card bg-blue-50 rounded-2xl p-6">
                                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center mb-4 shadow-sm">
                                         {p.icon}
                                     </div>
@@ -164,7 +283,7 @@ export default function AboutSection() {
                 </section>
 
                 {/* Meet Our Team */}
-                <section className="py-16 md:py-20 bg-gray-50">
+                <section className="py-16 md:py-20 bg-gray-50" ref={teamRef}>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-12">
                             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Meet Our Team</h2>
@@ -172,10 +291,9 @@ export default function AboutSection() {
                                 Dedicated professionals committed to finding your perfect property
                             </p>
                         </div>
-
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {team.map((member) => (
-                                <div key={member.name} className="bg-white rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+                                <div key={member.name} className="team-card bg-white rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
                                     <div className="overflow-hidden">
                                         <img
                                             src={member.avatar}
@@ -204,15 +322,14 @@ export default function AboutSection() {
                             </p>
                         </div>
 
-                        <div className="relative">
+                        <div className="relative" ref={journeyRef}>
                             <div className="absolute left-3 top-0 bottom-0 w-px bg-gray-200 lg:left-1/2 lg:-translate-x-1/2" />
-
                             <div className="space-y-8 md:space-y-10">
                                 {journey.map((item, i) => (
                                     <div key={item.year} className="relative lg:grid lg:grid-cols-2 lg:gap-10 lg:items-start">
                                         <div className={i % 2 === 0 ? "lg:pr-10" : "lg:pr-10 lg:order-2"}>
                                             <div className={
-                                                "ml-10 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:ml-0 " +
+                                                "journey-card ml-10 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:ml-0 " +
                                                 (i % 2 === 0 ? "lg:text-right" : "")
                                             }>
                                                 <p className="text-[#2664EB] font-bold text-2xl mb-1">{item.year}</p>
@@ -220,10 +337,8 @@ export default function AboutSection() {
                                                 <p className="text-[#4B5563] text-[14px] leading-[21px]">{item.description}</p>
                                             </div>
                                         </div>
-
                                         <div className={i % 2 === 0 ? "lg:pl-10" : "hidden lg:block lg:pl-10 lg:order-1"} />
-
-                                        <div className="absolute left-3 top-6 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-white bg-primary-600 shadow lg:left-1/2" />
+                                        <div className="journey-dot absolute left-3 top-6 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-white bg-primary-600 shadow lg:left-1/2" />
                                     </div>
                                 ))}
                             </div>
