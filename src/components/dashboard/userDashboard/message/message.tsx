@@ -268,7 +268,7 @@ export default function MessagesPage() {
                 </button>
               </div>
 
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+              <p className="text-[20px] font-bold text-[#4B5563] uppercase tracking-widest mb-3">
                 Account
               </p>
               <ul className="space-y-1.5 mb-6">
