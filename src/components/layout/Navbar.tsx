@@ -9,6 +9,7 @@ import { NAV_LINKS } from "@/lib/constants";
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const pathname = usePathname();
   const isHome = pathname === "/";
 
@@ -27,6 +28,23 @@ export default function Navbar() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHome]);
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      if (typeof window === "undefined") return;
+      const user = window.localStorage.getItem("expovivienda_demo_user");
+      setIsLoggedIn(Boolean(user));
+    };
+
+    syncAuthState();
+    window.addEventListener("storage", syncAuthState);
+    window.addEventListener("auth-changed", syncAuthState);
+
+    return () => {
+      window.removeEventListener("storage", syncAuthState);
+      window.removeEventListener("auth-changed", syncAuthState);
+    };
+  }, []);
 
   const isActiveLink = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -81,12 +99,21 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-4 py-2 transition-colors rounded-[999px]"
-            >
-              Dashboard
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-4 py-2 transition-colors rounded-[999px]"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-4 py-2 transition-colors rounded-[999px]"
+              >
+                Login/Signup
+              </Link>
+            )}
           </div>
 
           {/* Mobile toggle */}
@@ -118,12 +145,21 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/dashboard"
-            className="mt-3 block text-center bg-primary-600 text-white text-sm font-semibold px-4 py-2 rounded-lg"
-          >
-            Dashboard
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              href="/dashboard"
+              className="mt-3 block text-center bg-primary-600 text-white text-sm font-semibold px-4 py-2 rounded-lg"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="mt-3 block text-center bg-primary-600 text-white text-sm font-semibold px-4 py-2 rounded-lg"
+            >
+              Login/Signup
+            </Link>
+          )}
         </div>
       )}
     </nav>

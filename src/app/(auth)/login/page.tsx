@@ -1,6 +1,36 @@
+"use client";
+
 import Link from "next/link";
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+
+const DEMO_USER = {
+  name: "Demo Agent",
+  email: "demo@expovivienda.com",
+  password: "Demo@1234",
+};
 
 export default function Home() {
+  const router = useRouter();
+  const [email, setEmail] = useState(DEMO_USER.email);
+  const [password, setPassword] = useState(DEMO_USER.password);
+
+  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    window.localStorage.setItem(
+      "expovivienda_demo_user",
+      JSON.stringify({
+        name: DEMO_USER.name,
+        email,
+      })
+    );
+    window.dispatchEvent(new Event("auth-changed"));
+
+    router.push("/");
+    router.refresh();
+  };
+
   return (
     <div className="min-h-screen flex">
       
@@ -47,13 +77,18 @@ export default function Home() {
             Pick up where you left off
           </p>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleLogin}>
+
+            <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-700">
+              Demo user always prefilled: {DEMO_USER.email} / {DEMO_USER.password}
+            </div>
 
             <div>
               <label className="text-sm text-[#4B5563]">Email</label>
               <input
                 type="email"
-                placeholder="jane@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full mt-1 px-4 py-3 rounded-full bg-gray-100 focus:outline-none"
               />
             </div>
@@ -62,7 +97,8 @@ export default function Home() {
               <label className="text-sm text-[#4B5563]">Password</label>
               <input
                 type="password"
-                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full mt-1 px-4 py-3 rounded-full bg-gray-100 focus:outline-none"
               />
             </div>
