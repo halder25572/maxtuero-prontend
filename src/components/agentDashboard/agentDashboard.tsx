@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import EditListingModal, { type ListingModalData } from "./EditListingModal";
 import {
     LayoutDashboard, Radio, List, MessageCircle,
     PlusCircle, Settings, LogOut, Home, ArrowUpRight,
@@ -68,6 +69,15 @@ const topListings = [
         price: "$1950K",
         image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=200",
     },
+];
+
+const managementListings = [
+    { id: "1", title: "Modern Waterfront Villa", location: "Miami Beach, FL", price: "$2,450,000", status: "For Sale", image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=200" },
+    { id: "2", title: "Skyline View Apartments", location: "New York, NY", price: "$875,000", status: "For Sale", image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=200" },
+    { id: "3", title: "Downtown Luxury Penthouse", location: "Los Angeles, CA", price: "$3,200,000", status: "Raffle", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=200" },
+    { id: "4", title: "Mediterranean Garden Estate", location: "Santa Barbara, CA", price: "$1,950,000", status: "For Sale", image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=200" },
+    { id: "5", title: "Urban Modern Townhouse", location: "Austin, TX", price: "$725,000", status: "For Sale", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=200" },
+    { id: "6", title: "Lakeside Retreat", location: "Lake Tahoe, NV", price: "$1,650,000", status: "Raffle", image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=200" },
 ];
 
 function GoLivePanel() {
@@ -299,7 +309,7 @@ function AddPropertySection() {
                                 <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Listing Type</label>
                                 <select className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors text-gray-700 appearance-auto">
                                     <option>For Sale</option>
-                                    <option>For Rent</option>
+                                    <option>For Fair</option>
                                     <option>Raffle</option>
                                 </select>
                             </div>
@@ -534,9 +544,8 @@ function AddPropertySection() {
             <div className="flex justify-between mt-5">
                 <button
                     onClick={() => setStep(step - 1)}
-                    className={`flex items-center gap-2 border border-gray-200 text-gray-500 text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-gray-50 transition-colors ${
-                        step === 1 ? "invisible" : ""
-                    }`}
+                    className={`flex items-center gap-2 border border-gray-200 text-gray-500 text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-gray-50 transition-colors ${step === 1 ? "invisible" : ""
+                        }`}
                 >
                     ← Previous
                 </button>
@@ -587,22 +596,20 @@ function SettingsSection() {
             <div className="grid grid-cols-2 bg-gray-100 rounded-full p-1 mb-6">
                 <button
                     onClick={() => setSettingsTab("personal")}
-                    className={`flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-colors ${
-                        settingsTab === "personal"
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-colors ${settingsTab === "personal"
                             ? "bg-primary-600 text-white shadow"
                             : "text-gray-500 hover:text-gray-700"
-                    }`}
+                        }`}
                 >
                     <User size={14} />
                     Personal
                 </button>
                 <button
                     onClick={() => setSettingsTab("security")}
-                    className={`flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-colors ${
-                        settingsTab === "security"
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-colors ${settingsTab === "security"
                             ? "bg-primary-600 text-white shadow"
                             : "text-gray-500 hover:text-gray-700"
-                    }`}
+                        }`}
                 >
                     <Lock size={14} />
                     Security
@@ -682,49 +689,46 @@ function SettingsSection() {
             {/* Security Tab */}
             {settingsTab === "security" && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="font-bold text-gray-900 text-base mb-1">Security Settings</h3>
+                    <h3 className="font-bold text-gray-900 text-base mb-1">Security</h3>
                     <p className="text-gray-400 text-xs mb-6">Manage your password and account security</p>
 
                     <div className="space-y-5">
+                        {/* Current Password */}
                         <div>
                             <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Current Password</label>
                             <input
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Enter current password"
-                                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors placeholder:text-gray-300 bg-gray-50"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">New Password</label>
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Enter new password"
-                                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors placeholder:text-gray-300 bg-gray-50"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Confirm New Password</label>
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Confirm new password"
-                                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors placeholder:text-gray-300 bg-gray-50"
+                                type="password"
+                                defaultValue="12345678"
+                                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors bg-gray-50"
                             />
                         </div>
 
-                        {/* Show Password */}
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={showPassword}
-                                onChange={() => setShowPassword(!showPassword)}
-                                className="accent-primary-600"
-                            />
-                            <span className="text-sm text-gray-500">Show passwords</span>
-                        </label>
+                        {/* New Password + Confirm Password */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-sm font-semibold text-gray-700 mb-1.5 block">New Password</label>
+                                <input
+                                    type="password"
+                                    defaultValue="12345678"
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors bg-gray-50"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Confirm Password</label>
+                                <input
+                                    type="password"
+                                    defaultValue="12345678"
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors bg-gray-50"
+                                />
+                            </div>
+                        </div>
 
+                        {/* Update Button */}
                         <div className="flex justify-end">
                             <button className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors">
-                                <Lock size={14} />
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H18A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6A2.25 2.25 0 016 3.75h1.5m9 0h-9" />
+                                </svg>
                                 Update Password
                             </button>
                         </div>
@@ -738,6 +742,21 @@ function SettingsSection() {
 export default function AgentDashboard() {
     const [activeTab, setActiveTab] = useState("overview");
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [listingModalMode, setListingModalMode] = useState<"view" | "edit" | null>(null);
+    const [selectedListing, setSelectedListing] = useState<ListingModalData | null>(null);
+
+    const openListingModal = (
+        listing: (typeof managementListings)[number],
+        mode: "view" | "edit"
+    ) => {
+        setSelectedListing(listing);
+        setListingModalMode(mode);
+    };
+
+    const closeListingModal = () => {
+        setSelectedListing(null);
+        setListingModalMode(null);
+    };
 
     return (
         <div className="max-w-7xl mx-auto min-h-screen flex">
@@ -910,14 +929,7 @@ export default function AgentDashboard() {
 
                                     {/* Body */}
                                     <tbody className="divide-y divide-gray-50">
-                                        {[
-                                            { id: "1", title: "Modern Waterfront Villa", location: "Miami Beach, FL", price: "$2,450,000", status: "For Sale", image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=200" },
-                                            { id: "2", title: "Skyline View Apartments", location: "New York, NY", price: "$875,000", status: "For Sale", image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=200" },
-                                            { id: "3", title: "Downtown Luxury Penthouse", location: "Los Angeles, CA", price: "$3,200,000", status: "Raffle", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=200" },
-                                            { id: "4", title: "Mediterranean Garden Estate", location: "Santa Barbara, CA", price: "$1,950,000", status: "For Sale", image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=200" },
-                                            { id: "5", title: "Urban Modern Townhouse", location: "Austin, TX", price: "$725,000", status: "For Sale", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=200" },
-                                            { id: "6", title: "Lakeside Retreat", location: "Lake Tahoe, NV", price: "$1,650,000", status: "Raffle", image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=200" },
-                                        ].map((listing) => (
+                                        {managementListings.map((listing) => (
                                             <tr key={listing.id} className="hover:bg-gray-50 transition-colors">
                                                 {/* Property */}
                                                 <td className="px-5 py-4">
@@ -953,14 +965,22 @@ export default function AgentDashboard() {
                                                 <td className="px-4 py-4">
                                                     <div className="flex items-center gap-3">
                                                         {/* View */}
-                                                        <button className="text-gray-400 hover:text-primary-600 transition-colors">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => openListingModal(listing, "view")}
+                                                            className="text-gray-400 hover:text-primary-600 transition-colors"
+                                                        >
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.583-3.007-9.963-7.178z" />
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                             </svg>
                                                         </button>
                                                         {/* Edit */}
-                                                        <button className="text-gray-400 hover:text-primary-600 transition-colors">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => openListingModal(listing, "edit")}
+                                                            className="text-gray-400 hover:text-primary-600 transition-colors"
+                                                        >
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
                                                             </svg>
@@ -1158,6 +1178,67 @@ export default function AgentDashboard() {
                     {activeTab === "addproperty" && <AddPropertySection />}
 
                     {activeTab === "settings" && <SettingsSection />}
+
+                    {selectedListing && listingModalMode === "view" && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                            <div className="absolute inset-0 bg-black/50" onClick={closeListingModal} />
+                            <div className="relative w-full max-w-2xl rounded-3xl bg-white shadow-2xl border border-gray-100 overflow-hidden max-h-[90vh] overflow-y-auto">
+                                <div className="flex items-start justify-between px-6 py-5 border-b border-gray-100">
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                                            {listingModalMode === "view" ? "View Listing" : "Edit Listing"}
+                                        </p>
+                                        <h3 className="text-lg font-bold text-gray-900 mt-1">{selectedListing.title}</h3>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={closeListingModal}
+                                        className="text-gray-400 hover:text-gray-700 transition-colors"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                </div>
+
+                                <div className="p-6 space-y-6">
+                                    <div className="relative h-64 sm:h-72 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
+                                        <img
+                                            src={selectedListing.image}
+                                            alt={selectedListing.title}
+                                            className="w-full h-full object-contain object-center"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Location</p>
+                                            <p className="text-sm text-gray-700 mt-1">{selectedListing.location}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Price</p>
+                                            <p className="text-sm text-gray-700 mt-1">{selectedListing.price}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</p>
+                                            <p className="text-sm text-gray-700 mt-1">{selectedListing.status}</p>
+                                        </div>
+                                        <div className="pt-2 flex justify-end gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={closeListingModal}
+                                                className="px-4 py-2 rounded-full border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                                            >
+                                                Close
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {selectedListing && listingModalMode === "edit" && (
+                        <EditListingModal listing={selectedListing} onClose={closeListingModal} />
+                    )}
 
                 </div>
             </div>
