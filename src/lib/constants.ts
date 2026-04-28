@@ -1,13 +1,17 @@
 import { Property, Agent, Raffle, Testimonial, VirtualExpo } from "@/types";
 
-export const FEATURED_PROPERTIES: Property[] = [
+export const ALL_PROPERTIES: Property[] = [
   {
     id: "1",
     title: "Luxury Beachfront Villa in Punta Cana",
     price: 850000,
     location: "Punta Cana, La Altagracia",
     city: "Punta Cana",
-    images: ["https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800"],
+    images: [
+      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+    ],
     bedrooms: 5,
     bathrooms: 4,
     area: 4500,
@@ -15,8 +19,9 @@ export const FEATURED_PROPERTIES: Property[] = [
     status: "for-sale",
     featured: true,
     agentId: "1",
-    description: "Stunning beachfront villa with panoramic ocean views.",
-    amenities: ["Pool", "Beach Access", "Gym", "Security"],
+    description:
+      "Stunning beachfront villa with panoramic ocean views. This exceptional property features open-concept living areas, a gourmet kitchen, and a private pool steps from the Caribbean Sea. Perfect for luxury living or an upscale vacation rental investment.",
+    amenities: ["Pool", "Beach Access", "Gym", "Security", "Air Conditioning", "Parking"],
     createdAt: "2025-01-01",
   },
   {
@@ -25,7 +30,11 @@ export const FEATURED_PROPERTIES: Property[] = [
     price: 425000,
     location: "Piantini, Santo Domingo",
     city: "Santo Domingo",
-    images: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800"],
+    images: [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
+    ],
     bedrooms: 4,
     bathrooms: 3,
     area: 3200,
@@ -33,8 +42,9 @@ export const FEATURED_PROPERTIES: Property[] = [
     status: "for-sale",
     featured: true,
     agentId: "2",
-    description: "Luxurious penthouse with city views and modern finishes.",
-    amenities: ["Rooftop Pool", "Concierge", "Parking", "Gym"],
+    description:
+      "Luxurious penthouse with city views and modern finishes. Located in the prestigious Piantini district, this penthouse offers floor-to-ceiling windows, high-end appliances, and a rooftop terrace perfect for entertaining.",
+    amenities: ["Rooftop Pool", "Concierge", "Parking", "Gym", "24/7 Security"],
     createdAt: "2025-01-15",
   },
   {
@@ -43,7 +53,11 @@ export const FEATURED_PROPERTIES: Property[] = [
     price: 675000,
     location: "Cabarete, Puerto Plata",
     city: "Cabarete",
-    images: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800"],
+    images: [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
+      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+    ],
     bedrooms: 5,
     bathrooms: 5,
     area: 6000,
@@ -51,11 +65,80 @@ export const FEATURED_PROPERTIES: Property[] = [
     status: "for-sale",
     featured: true,
     agentId: "3",
-    description: "Sprawling tropical estate surrounded by lush gardens.",
-    amenities: ["Private Pool", "Garden", "Maid Quarters", "Garage"],
+    description:
+      "Sprawling tropical estate surrounded by lush gardens. This magnificent property features multiple entertaining spaces, a chef's kitchen, private pool, and guest quarters — ideal for large families or a boutique hotel venture.",
+    amenities: ["Private Pool", "Garden", "Maid Quarters", "Garage", "BBQ Area"],
     createdAt: "2025-02-01",
   },
+  {
+    id: "4",
+    title: "Beachside Apartment in Las Terrenas",
+    price: 195000,
+    location: "Las Terrenas, Samaná",
+    city: "Las Terrenas",
+    images: [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800",
+    ],
+    bedrooms: 2,
+    bathrooms: 2,
+    area: 1100,
+    type: "apartment",
+    status: "for-sale",
+    featured: false,
+    agentId: "1",
+    description:
+      "Bright beachside apartment just minutes from the white sands of Las Terrenas. Modern open layout, fully equipped kitchen, and a breezy terrace with sea views.",
+    amenities: ["Pool", "Beach Access", "Air Conditioning", "Parking"],
+    createdAt: "2025-02-10",
+  },
+  {
+    id: "5",
+    title: "Golf Course Condo in Casa de Campo",
+    price: 320000,
+    location: "La Romana, La Romana",
+    city: "La Romana",
+    images: [
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800",
+    ],
+    bedrooms: 3,
+    bathrooms: 2,
+    area: 2000,
+    type: "condo",
+    status: "for-sale",
+    featured: false,
+    agentId: "4",
+    description:
+      "Elegant condo overlooking the world-famous Teeth of the Dog golf course at Casa de Campo. Enjoy resort-style amenities, a private marina, and polo grounds.",
+    amenities: ["Golf Access", "Pool", "Marina", "Security", "Concierge"],
+    createdAt: "2025-02-20",
+  },
+  {
+    id: "6",
+    title: "Mountain View Villa in Jarabacoa",
+    price: 280000,
+    location: "Jarabacoa, La Vega",
+    city: "Jarabacoa",
+    images: [
+      "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
+    ],
+    bedrooms: 4,
+    bathrooms: 3,
+    area: 3500,
+    type: "villa",
+    status: "for-sale",
+    featured: false,
+    agentId: "2",
+    description:
+      "Breathtaking villa nestled in the cool mountain air of Jarabacoa. Features a river-view terrace, fireplace, and lush tropical garden. Perfect for those seeking a tranquil escape from city life.",
+    amenities: ["Garden", "Fireplace", "River View", "Parking", "BBQ Area"],
+    createdAt: "2025-03-01",
+  },
 ];
+
+export const FEATURED_PROPERTIES: Property[] = ALL_PROPERTIES.filter((p) => p.featured);
 
 export const AGENTS: Agent[] = [
   {
@@ -148,6 +231,29 @@ export const VIRTUAL_EXPOS: VirtualExpo[] = [
     thumbnail: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
     features: ["Live property tours", "Meet developers", "Interactive Q&A", "Exclusive deals"],
     status: "upcoming",
+  },
+];
+
+export const RAFFLES: Raffle[] = [
+  {
+    id: "r1",
+    propertyId: "1",
+    property: ALL_PROPERTIES[0],
+    ticketPrice: 25,
+    totalTickets: 5000,
+    soldTickets: 3241,
+    endDate: "2026-05-30T00:00:00Z",
+    status: "active",
+  },
+  {
+    id: "r2",
+    propertyId: "2",
+    property: ALL_PROPERTIES[1],
+    ticketPrice: 15,
+    totalTickets: 3000,
+    soldTickets: 1120,
+    endDate: "2026-06-15T00:00:00Z",
+    status: "active",
   },
 ];
 
