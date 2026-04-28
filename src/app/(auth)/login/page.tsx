@@ -3,32 +3,30 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-
-const DEMO_USER = {
-  name: "Demo Agent",
-  email: "demo@expovivienda.com",
-  password: "Demo@1234",
-};
+import useAuth from "@/hooks/useAuth";
 
 export default function Home() {
   const router = useRouter();
-  const [email, setEmail] = useState(DEMO_USER.email);
-  const [password, setPassword] = useState(DEMO_USER.password);
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
-    window.localStorage.setItem(
-      "expovivienda_demo_user",
-      JSON.stringify({
-        name: DEMO_USER.name,
-        email,
-      })
-    );
-    window.dispatchEvent(new Event("auth-changed"));
-
-    router.push("/");
-    router.refresh();
+    try {
+      await login({ email, password });
+      router.replace("/dashboard");
+      router.refresh();
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : "Login failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -78,10 +76,11 @@ export default function Home() {
           </p>
 
           <form className="space-y-4" onSubmit={handleLogin}>
-
-            <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-700">
-              Demo user always prefilled: {DEMO_USER.email} / {DEMO_USER.password}
-            </div>
+            {error ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+                {error}
+              </div>
+            ) : null}
 
             <div>
               <label className="text-sm text-[#4B5563]">Email</label>
@@ -89,6 +88,7 @@ export default function Home() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
                 className="w-full mt-1 px-4 py-3 rounded-full bg-gray-100 focus:outline-none"
               />
             </div>
@@ -99,6 +99,7 @@ export default function Home() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
                 className="w-full mt-1 px-4 py-3 rounded-full bg-gray-100 focus:outline-none"
               />
             </div>
@@ -111,9 +112,10 @@ export default function Home() {
 
             <button
               type="submit"
+              disabled={isSubmitting}
               className="w-full bg-blue-600 text-white py-3 rounded-full font-medium hover:bg-blue-700 transition"
             >
-              Log In
+              {isSubmitting ? "Signing in..." : "Log In"}
             </button>
           </form>
 

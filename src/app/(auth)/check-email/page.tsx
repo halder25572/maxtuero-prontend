@@ -1,7 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export default function CheckEmailPage() {
+function maskEmail(email: string) {
+  const [name, domain] = email.split("@");
+
+  if (!name || !domain) {
+    return email;
+  }
+
+  return `${name.slice(0, 2)}***@${domain}`;
+}
+
+export default function CheckEmailPage({
+  searchParams,
+}: {
+  searchParams?: { email?: string };
+}) {
+  const email = searchParams?.email ? decodeURIComponent(searchParams.email) : "fr***@gmail.com";
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       
@@ -52,7 +68,7 @@ export default function CheckEmailPage() {
           <p className="text-sm text-gray-600 mb-4">
             We’ve sent a password reset link to
             <br />
-            <span className="font-medium">fr***@gmail.com</span>
+            <span className="font-medium">{maskEmail(email)}</span>
           </p>
 
           <p className="text-xs text-gray-500 mb-6">

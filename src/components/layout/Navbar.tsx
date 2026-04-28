@@ -5,11 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { NAV_LINKS } from "@/lib/constants";
+import useAuth from "@/hooks/useAuth";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn } = useAuth();
   const pathname = usePathname();
   const isHome = pathname === "/";
 
@@ -28,23 +29,6 @@ export default function Navbar() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHome]);
-
-  useEffect(() => {
-    const syncAuthState = () => {
-      if (typeof window === "undefined") return;
-      const user = window.localStorage.getItem("expovivienda_demo_user");
-      setIsLoggedIn(Boolean(user));
-    };
-
-    syncAuthState();
-    window.addEventListener("storage", syncAuthState);
-    window.addEventListener("auth-changed", syncAuthState);
-
-    return () => {
-      window.removeEventListener("storage", syncAuthState);
-      window.removeEventListener("auth-changed", syncAuthState);
-    };
-  }, []);
 
   const isActiveLink = (href: string) => {
     if (href === "/") return pathname === "/";
