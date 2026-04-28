@@ -20,6 +20,7 @@ type EditListingModalProps = {
 
 export default function EditListingModal({ listing, onClose }: EditListingModalProps) {
     const [step, setStep] = useState(1);
+    const [salesType, setSalesType] = useState<"sales" | "fair" | "raffle">("sales");
     const maxImages = 10;
     const [images, setImages] = useState(() => {
         const initialImages = listing.images?.length ? listing.images : [listing.image];
@@ -178,10 +179,10 @@ export default function EditListingModal({ listing, onClose }: EditListingModalP
                             <div key={s.id} className="flex items-center gap-1 shrink-0">
                                 <button type="button" onClick={() => setStep(s.id)} className="flex items-center gap-2">
                                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step > s.id
-                                            ? "bg-green-500 text-white"
-                                            : step === s.id
-                                                ? "bg-primary-600 text-white"
-                                                : "bg-gray-100 text-gray-400"
+                                        ? "bg-green-500 text-white"
+                                        : step === s.id
+                                            ? "bg-primary-600 text-white"
+                                            : "bg-gray-100 text-gray-400"
                                         }`}>
                                         {step > s.id ? (
                                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -224,10 +225,19 @@ export default function EditListingModal({ listing, onClose }: EditListingModalP
 
                                     <div>
                                         <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Listing Type</label>
-                                        <select className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors text-gray-700 appearance-auto">
+                                        {/* <select className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors text-gray-700 appearance-auto">
                                             <option>For Sale</option>
                                             <option>For Fair</option>
                                             <option>Raffle</option>
+                                        </select> */}
+                                        <select
+                                            value={salesType}
+                                            onChange={(e) => setSalesType(e.target.value as "sales" | "fair" | "raffle")}
+                                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors text-gray-700 appearance-auto"
+                                        >
+                                            <option value="sales">For Sale</option>
+                                            <option value="fair">For Fair</option>
+                                            <option value="raffle">Raffle</option>
                                         </select>
                                     </div>
 

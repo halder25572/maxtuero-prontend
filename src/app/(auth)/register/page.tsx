@@ -1,6 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="min-h-screen flex">
 
@@ -68,11 +74,21 @@ export default function RegisterPage() {
             {/* Password */}
             <div>
               <label className="text-sm text-gray-600">Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="w-full mt-1 px-4 py-3 rounded-full bg-gray-100 focus:outline-none"
-              />
+              <div className="relative mt-1">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  className="w-full px-4 py-3 pr-12 rounded-full bg-gray-100 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="absolute inset-y-0 right-4 flex items-center text-gray-500"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             {/* Role Toggle */}

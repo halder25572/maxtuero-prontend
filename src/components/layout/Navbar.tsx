@@ -5,11 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { NAV_LINKS } from "@/lib/constants";
+import { readAuthSession } from "@/lib/auth";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const pathname = usePathname();
   const isHome = pathname === "/";
 
@@ -32,8 +34,9 @@ export default function Navbar() {
   useEffect(() => {
     const syncAuthState = () => {
       if (typeof window === "undefined") return;
-      const user = window.localStorage.getItem("expovivienda_demo_user");
-      setIsLoggedIn(Boolean(user));
+      const session = readAuthSession();
+      setIsLoggedIn(Boolean(session));
+      setUserRole((session as any)?.user?.role?.toString?.()?.toLowerCase?.() ?? null);
     };
 
     syncAuthState();
@@ -45,6 +48,8 @@ export default function Navbar() {
       window.removeEventListener("auth-changed", syncAuthState);
     };
   }, []);
+
+  const dashboardHref = userRole === "agent" ? "/agent-dashboard" : "/dashboard";
 
   const isActiveLink = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -101,7 +106,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {isLoggedIn ? (
               <Link
-                href="/dashboard"
+                href={dashboardHref}
                 className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-4 py-2 transition-colors rounded-[999px]"
               >
                 Dashboard
@@ -147,7 +152,7 @@ export default function Navbar() {
           ))}
           {isLoggedIn ? (
             <Link
-              href="/dashboard"
+              href={dashboardHref}
               className="mt-3 block text-center bg-primary-600 text-white text-sm font-semibold px-4 py-2 rounded-lg"
             >
               Dashboard

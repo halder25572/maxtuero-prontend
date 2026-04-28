@@ -4,6 +4,9 @@ import { type ReactNode, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Footer from "@/components/layout/Footer";
+import toast from "react-hot-toast";
+import { logoutUser } from "@/lib/api";
+import { clearAuthSession, readAuthSession } from "@/lib/auth";
 import {
   User, MessageCircle, Heart, Ticket, Globe, LayoutGrid,
   LogOut, Pencil, Mail, Phone, MapPin, Calendar,
@@ -67,6 +70,7 @@ const profileFields = [
 export default function DashboardPage() {
   const router = useRouter();
   const pathname = usePathname();
+  const authSession = readAuthSession();
   const normalizedPath = (pathname || "").replace(/\/$/, "");
   const [activeTab, setActiveTab] = useState("profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -125,6 +129,23 @@ export default function DashboardPage() {
     setShowPasswordModal(false);
     setPasswordError("");
     setPasswords({ current: "", newPass: "", confirm: "" });
+  };
+
+  const handleLogout = async () => {
+    try {
+      if (authSession?.token) {
+        const response = await logoutUser(authSession.token);
+        toast.success(response.message || "Logged out successfully");
+      } else {
+        toast.success("Logged out successfully");
+      }
+    } catch {
+      toast.error("Logout failed");
+    } finally {
+      clearAuthSession();
+      router.push("/login");
+      router.refresh();
+    }
   };
 
   return (
@@ -295,7 +316,6 @@ export default function DashboardPage() {
                             ? "bg-blue-50 text-primary-600 font-semibold"
                             : "text-gray-600 hover:bg-gray-50"
                           }`}
-                        gap-2
                       >
                         <span className="flex items-center gap-2">
                           {item.icon}
@@ -341,7 +361,7 @@ export default function DashboardPage() {
                 ))}
               </ul>
 
-              <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors">
+              <button type="button" onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors">
                 <LogOut size={14} />
                 Logout
               </button>

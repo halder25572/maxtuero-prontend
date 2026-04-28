@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { logoutUser, storeProperty, type SalesType } from "@/lib/api";
+import { initPropertyStep2Upload, uploadPropertyStep2VideoWithChunks } from "@/lib/step2Upload";
+import { clearAuthSession, readAuthSession } from "@/lib/auth";
 import EditListingModal, { type ListingModalData } from "./EditListingModal";
 import {
     LayoutDashboard, Radio, List, MessageCircle,
@@ -233,6 +238,141 @@ function GoLivePanel() {
 
 function AddPropertySection() {
     const [step, setStep] = useState(1);
+    const authSession = readAuthSession();
+    const [isPublishing, setIsPublishing] = useState(false);
+    const [imagesFiles, setImagesFiles] = useState<File[]>([]);
+    const [videoFile, setVideoFile] = useState<File | null>(null);
+    const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+    const imageInputRef = useRef<HTMLInputElement | null>(null);
+    const videoInputRef = useRef<HTMLInputElement | null>(null);
+    const [form, setForm] = useState<{
+        title: string;
+        salesType: SalesType;
+        propertyTypeId: number;
+        bedrooms: number;
+        bathrooms: number;
+        squareFeet: number;
+        description: string;
+        address: string;
+        city: string;
+        state: string;
+        zipCode: string;
+        country: string;
+        latitude: number;
+        longitude: number;
+        price: string;
+    }>({
+        title: "Modern Waterfront Villa",
+        salesType: "sales",
+        propertyTypeId: 1,
+        bedrooms: 3,
+        bathrooms: 2,
+        squareFeet: 2400,
+        description: "",
+        address: "123 Main Street",
+        city: "Miami",
+        state: "FL",
+        zipCode: "33139",
+        country: "United States",
+        latitude: 25.7617,
+        longitude: -80.1918,
+        price: "2500000",
+    });
+
+    const handlePublish = async () => {
+        if (!authSession?.token) {
+            toast.error("Please log in again to publish the listing.");
+            return;
+        }
+
+        setIsPublishing(true);
+
+        try {
+            const response = await storeProperty(
+                {
+                    title: form.title,
+                    sales_type: form.salesType,
+                    property_type_id: form.propertyTypeId,
+                    bedrooms: form.bedrooms,
+                    bathrooms: form.bathrooms,
+                    area: form.squareFeet,
+                    description: form.description,
+                    address: form.address,
+                    city: form.city,
+                    state: form.state,
+                    zip_code: form.zipCode,
+                    country: form.country,
+                    latitude: form.latitude,
+                    longitude: form.longitude,
+                },
+                authSession.token,
+            );
+
+            toast.success(response.message || "Property published successfully");
+
+            // After property is created, upload media (images and optional video) using the step2 helper
+            const propertyId = response.data?.property_id;
+            if (propertyId && (imagesFiles.length > 0 || videoFile)) {
+                const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+                const toastId = toast.loading("Uploading media...");
+
+                try {
+                    if (videoFile) {
+                        const uploadRes = await uploadPropertyStep2VideoWithChunks(
+                            { baseUrl, token: authSession.token! },
+                            {
+                                propertyId,
+                                images: imagesFiles,
+                                videoFile,
+                                onProgress: ({ percent }) => {
+                                    setUploadProgress(percent);
+                                },
+                            },
+                        );
+
+                        if (!uploadRes.success) {
+                            toast.error(uploadRes.message || "Media upload failed");
+                        } else if (uploadRes.data?.status === "completed") {
+                            toast.success("Media uploaded successfully");
+                        } else {
+                            toast.success("Media upload finished");
+                        }
+                    } else {
+                        // images only: call init which accepts images
+                        const initRes = await initPropertyStep2Upload(
+                            { baseUrl, token: authSession.token! },
+                            {
+                                propertyId,
+                                images: imagesFiles,
+                                videoFileName: "",
+                                totalChunks: 0,
+                                fileSize: 0,
+                            },
+                        );
+
+                        if (!initRes.success) {
+                            toast.error(initRes.message || "Image upload failed");
+                        } else {
+                            toast.success("Images uploaded successfully");
+                        }
+                    }
+                } catch (err) {
+                    const msg = err instanceof Error ? err.message : "Media upload failed";
+                    toast.error(msg);
+                } finally {
+                    toast.dismiss(toastId);
+                    setUploadProgress(null);
+                }
+            }
+
+            setStep(1);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Failed to publish property";
+            toast.error(message);
+        } finally {
+            setIsPublishing(false);
+        }
+    };
 
     const steps = [
         { id: 1, label: "Basic Info" },
@@ -301,16 +441,38 @@ function AddPropertySection() {
                                 <input
                                     type="text"
                                     placeholder="e.g. Modern Waterfront Villa"
+                                    value={form.title}
+                                    onChange={(e) => setForm((current) => ({ ...current, title: e.target.value }))}
                                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors placeholder:text-gray-300"
                                 />
                             </div>
 
                             <div>
                                 <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Listing Type</label>
-                                <select className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors text-gray-700 appearance-auto">
-                                    <option>For Sale</option>
-                                    <option>For Fair</option>
-                                    <option>Raffle</option>
+                                <select
+                                    value={form.salesType}
+                                    onChange={(e) => setForm((current) => ({ ...current, salesType: e.target.value as SalesType }))}
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors text-gray-700 appearance-auto"
+                                >
+                                    <option value="sales">For Sale</option>
+                                    <option value="fair">For Fair</option>
+                                    <option value="raffle">Raffle</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Property Type</label>
+                                <select
+                                    value={form.propertyTypeId}
+                                    onChange={(e) => setForm((current) => ({ ...current, propertyTypeId: Number(e.target.value) }))}
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors text-gray-700 appearance-auto"
+                                >
+                                    <option value={1}>House</option>
+                                    <option value={2}>Villa</option>
+                                    <option value={3}>Apartment</option>
+                                    <option value={4}>Condo</option>
+                                    <option value={5}>Land</option>
+                                    <option value={6}>Commercial</option>
                                 </select>
                             </div>
 
@@ -319,7 +481,8 @@ function AddPropertySection() {
                                     <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Bedrooms</label>
                                     <input
                                         type="number"
-                                        defaultValue={3}
+                                        value={form.bedrooms}
+                                        onChange={(e) => setForm((current) => ({ ...current, bedrooms: Number(e.target.value) }))}
                                         className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors"
                                     />
                                 </div>
@@ -327,7 +490,8 @@ function AddPropertySection() {
                                     <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Bathrooms</label>
                                     <input
                                         type="number"
-                                        defaultValue={2}
+                                        value={form.bathrooms}
+                                        onChange={(e) => setForm((current) => ({ ...current, bathrooms: Number(e.target.value) }))}
                                         className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors"
                                     />
                                 </div>
@@ -335,7 +499,8 @@ function AddPropertySection() {
                                     <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Sq Ft</label>
                                     <input
                                         type="number"
-                                        defaultValue={2400}
+                                        value={form.squareFeet}
+                                        onChange={(e) => setForm((current) => ({ ...current, squareFeet: Number(e.target.value) }))}
                                         className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors"
                                     />
                                 </div>
@@ -346,6 +511,8 @@ function AddPropertySection() {
                                 <textarea
                                     rows={5}
                                     placeholder="Describe your property..."
+                                    value={form.description}
+                                    onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))}
                                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors placeholder:text-gray-300 resize-y"
                                 />
                             </div>
@@ -368,7 +535,8 @@ function AddPropertySection() {
                                 <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Address</label>
                                 <input
                                     type="text"
-                                    defaultValue="123 Main Street"
+                                    value={form.address}
+                                    onChange={(e) => setForm((current) => ({ ...current, address: e.target.value }))}
                                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors"
                                 />
                             </div>
@@ -378,7 +546,8 @@ function AddPropertySection() {
                                     <label className="text-sm font-semibold text-gray-700 mb-1.5 block">City</label>
                                     <input
                                         type="text"
-                                        defaultValue="Miami"
+                                        value={form.city}
+                                        onChange={(e) => setForm((current) => ({ ...current, city: e.target.value }))}
                                         className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors"
                                     />
                                 </div>
@@ -386,7 +555,8 @@ function AddPropertySection() {
                                     <label className="text-sm font-semibold text-gray-700 mb-1.5 block">State</label>
                                     <input
                                         type="text"
-                                        defaultValue="FL"
+                                        value={form.state}
+                                        onChange={(e) => setForm((current) => ({ ...current, state: e.target.value }))}
                                         className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors"
                                     />
                                 </div>
@@ -397,7 +567,8 @@ function AddPropertySection() {
                                     <label className="text-sm font-semibold text-gray-700 mb-1.5 block">ZIP Code</label>
                                     <input
                                         type="text"
-                                        defaultValue="33139"
+                                        value={form.zipCode}
+                                        onChange={(e) => setForm((current) => ({ ...current, zipCode: e.target.value }))}
                                         className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors"
                                     />
                                 </div>
@@ -405,7 +576,31 @@ function AddPropertySection() {
                                     <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Country</label>
                                     <input
                                         type="text"
-                                        defaultValue="United States"
+                                        value={form.country}
+                                        onChange={(e) => setForm((current) => ({ ...current, country: e.target.value }))}
+                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Latitude</label>
+                                    <input
+                                        type="number"
+                                        step="any"
+                                        value={form.latitude}
+                                        onChange={(e) => setForm((current) => ({ ...current, latitude: Number(e.target.value) }))}
+                                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Longitude</label>
+                                    <input
+                                        type="number"
+                                        step="any"
+                                        value={form.longitude}
+                                        onChange={(e) => setForm((current) => ({ ...current, longitude: Number(e.target.value) }))}
                                         className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors"
                                     />
                                 </div>
@@ -446,7 +641,17 @@ function AddPropertySection() {
                             <div>
                                 <label className="text-sm font-semibold text-gray-700 mb-2 block">Property Images</label>
                                 <label className="block border border-gray-200 rounded-xl overflow-hidden cursor-pointer hover:border-primary-400 transition-colors">
-                                    <input type="file" accept="image/*" multiple className="hidden" />
+                                    <input
+                                        ref={(el) => { imageInputRef.current = el }}
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const files = e.target.files;
+                                            if (files) setImagesFiles(Array.from(files));
+                                        }}
+                                    />
                                     <div className="flex flex-col items-center justify-center py-12 bg-white">
                                         <div className="mb-3 text-gray-400">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -455,6 +660,9 @@ function AddPropertySection() {
                                         </div>
                                         <p className="text-sm font-medium text-gray-600">Click to upload images</p>
                                         <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 10MB each</p>
+                                        {imagesFiles.length > 0 && (
+                                            <p className="text-xs text-gray-500 mt-3">{imagesFiles.length} image(s) selected</p>
+                                        )}
                                     </div>
                                 </label>
                             </div>
@@ -463,7 +671,16 @@ function AddPropertySection() {
                             <div>
                                 <label className="text-sm font-semibold text-gray-700 mb-2 block">Video Walkthrough</label>
                                 <label className="block border border-gray-200 rounded-xl overflow-hidden cursor-pointer hover:border-primary-400 transition-colors">
-                                    <input type="file" accept="video/*" className="hidden" />
+                                    <input
+                                        ref={(el) => { videoInputRef.current = el }}
+                                        type="file"
+                                        accept="video/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const files = e.target.files;
+                                            if (files && files[0]) setVideoFile(files[0]);
+                                        }}
+                                    />
                                     <div className="flex flex-col items-center justify-center py-12 bg-white">
                                         <div className="mb-3 text-gray-400">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -472,6 +689,12 @@ function AddPropertySection() {
                                         </div>
                                         <p className="text-sm font-medium text-gray-600">Click to upload video</p>
                                         <p className="text-xs text-gray-400 mt-1">MP4, MOV up to 500MB</p>
+                                        {videoFile && (
+                                            <p className="text-xs text-gray-500 mt-3">Selected: {videoFile.name}</p>
+                                        )}
+                                        {uploadProgress !== null && (
+                                            <p className="text-xs text-gray-500 mt-3">Uploading: {uploadProgress}%</p>
+                                        )}
                                     </div>
                                 </label>
                             </div>
@@ -498,6 +721,8 @@ function AddPropertySection() {
                                 <input
                                     type="text"
                                     placeholder="2,500,000"
+                                    value={form.price}
+                                    onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))}
                                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary-600 transition-colors placeholder:text-gray-300"
                                 />
                             </div>
@@ -559,9 +784,12 @@ function AddPropertySection() {
                     </button>
                 ) : (
                     <button
+                        type="button"
+                        onClick={handlePublish}
+                        disabled={isPublishing}
                         className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-6 py-2.5 rounded-full transition-colors"
                     >
-                        Publish Listing <ArrowUpRight size={15} />
+                        {isPublishing ? "Publishing..." : <>Publish Listing <ArrowUpRight size={15} /></>}
                     </button>
                 )}
             </div>
@@ -744,6 +972,25 @@ export default function AgentDashboard() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [listingModalMode, setListingModalMode] = useState<"view" | "edit" | null>(null);
     const [selectedListing, setSelectedListing] = useState<ListingModalData | null>(null);
+    const router = useRouter();
+    const authSession = readAuthSession();
+
+    const handleLogout = async () => {
+        try {
+            if (authSession?.token) {
+                const response = await logoutUser(authSession.token);
+                toast.success(response.message || "Logged out successfully");
+            } else {
+                toast.success("Logged out successfully");
+            }
+        } catch (err) {
+            toast.error("Logout failed");
+        } finally {
+            clearAuthSession();
+            router.push("/login");
+            router.refresh();
+        }
+    };
 
     const openListingModal = (
         listing: (typeof managementListings)[number],
@@ -818,7 +1065,7 @@ export default function AgentDashboard() {
                 </nav>
 
                 {/* Logout */}
-                <button className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-xl transition-colors mb-4 mt-2">
+                <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-xl transition-colors mb-4 mt-2">
                     <LogOut size={15} />
                     Logout
                 </button>

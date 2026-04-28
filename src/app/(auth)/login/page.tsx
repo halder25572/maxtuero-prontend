@@ -3,32 +3,40 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-
-const DEMO_USER = {
-  name: "Demo Agent",
-  email: "demo@expovivienda.com",
-  password: "Demo@1234",
-};
+import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
+import { loginUser } from "@/lib/api";
+import { writeAuthSession } from "@/lib/auth";
 
 export default function Home() {
   const router = useRouter();
-  const [email, setEmail] = useState(DEMO_USER.email);
-  const [password, setPassword] = useState(DEMO_USER.password);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    window.localStorage.setItem(
-      "expovivienda_demo_user",
-      JSON.stringify({
-        name: DEMO_USER.name,
-        email,
-      })
-    );
-    window.dispatchEvent(new Event("auth-changed"));
+    setIsLoading(true);
 
-    router.push("/");
-    router.refresh();
+    try {
+      const response = await loginUser({ email, password });
+      writeAuthSession({
+        user: response.data.user,
+        token: response.data.authorisation.token,
+        type: response.data.authorisation.type,
+      });
+
+      toast.success(response.message || "Logged in successfully");
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Login failed";
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -78,29 +86,36 @@ export default function Home() {
           </p>
 
           <form className="space-y-4" onSubmit={handleLogin}>
-
-            <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-700">
-              Demo user always prefilled: {DEMO_USER.email} / {DEMO_USER.password}
-            </div>
-
             <div>
               <label className="text-sm text-[#4B5563]">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
                 className="w-full mt-1 px-4 py-3 rounded-full bg-gray-100 focus:outline-none"
               />
             </div>
 
             <div>
               <label className="text-sm text-[#4B5563]">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full mt-1 px-4 py-3 rounded-full bg-gray-100 focus:outline-none"
-              />
+              <div className="relative mt-1">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-3 pr-12 rounded-full bg-gray-100 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="absolute inset-y-0 right-4 flex items-center text-gray-500"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             <div className="text-right">
@@ -111,9 +126,10 @@ export default function Home() {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-full font-medium hover:bg-blue-700 transition"
+              disabled={isLoading}
+              className="w-full bg-blue-600 text-white py-3 rounded-full font-medium hover:bg-blue-700 transition disabled:opacity-60"
             >
-              Log In
+              {isLoading ? "Logging in..." : "Log In"}
             </button>
           </form>
 
